@@ -48,8 +48,10 @@ class AppBarra extends StatelessWidget {
                             Icons.home_outlined,
                             size: 30,
                           ),
-                          onPressed: () => Navigator.pushReplacementNamed(
-                              context, "/telaInicio")),
+                          onPressed: () => iconeNavegacao != IconeNavegacao.home
+                              ? Navigator.pushReplacementNamed(
+                                  context, "/telaInicio")
+                              : null),
                       _controladorCarrinho.listaProdutos.isEmpty
                           ? NavegacaoBotao(
                               titulo: "Carrinho",
@@ -76,8 +78,8 @@ class AppBarra extends StatelessWidget {
                                     onPressed: () => Navigator.pushNamed(
                                         context, "/telaCarrinho")),
                                 Positioned(
-                                  left: 28,
-                                  top: 3,
+                                  left: 35,
+                                  top: 5,
                                   height: 16,
                                   width: 16,
                                   child: Container(
@@ -138,22 +140,30 @@ class NavegacaoBotao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: Container(
-            height: 30,
-            child: IconButton(
-                color: selecionado() ? Colors.blue : Color(0xff6f747b),
-                icon: icone,
-                onPressed: () {
-                  onPressed();
-                }),
-          ),
+    return InkWell(
+      onTap: () => onPressed(),
+      child: Container(
+        height: 75,
+        width: 65,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 9, bottom: 4.0),
+              child: IconTheme.merge(
+                data: IconThemeData(
+                  size: 30,
+                  color: selecionado() ? Colors.blue : Color(0xff6f747b),
+                ),
+                child: icone,
+              ),
+            ),
+            Text(
+              "$titulo",
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
         ),
-        Text("$titulo"),
-      ],
+      ),
     );
   }
 }

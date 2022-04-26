@@ -57,6 +57,10 @@ class _TelaPesquisaPlanosState extends State<TelaPesquisaPlanos> {
                   controladorPesquisaPlanos.pesquisaPlano(
                       plano: text.toString());
                 },
+                onChanged: (text) {
+                  controladorPesquisaPlanos.pesquisaPlano(
+                      plano: text.toString());
+                },
                 hintText: "Busque pelo nome do plano",
               ),
             )),

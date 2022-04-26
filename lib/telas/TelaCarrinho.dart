@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:app_consultor/servicos/ServicosPlano.dart';
 import 'package:app_consultor/util/UtilCarregamento.dart';
+import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -29,23 +30,27 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
   ServicosPlano _servicosPlano = ServicosPlano();
   ControladorCarrinho _controladorCarrinho = GetIt.I.get<ControladorCarrinho>();
   ControladorPesquisaProdutos controladorPesquisaProdutos =
-      ControladorPesquisaProdutos();
+      ControladorPesquisaProdutos(diaria: false);
   ControladorPesquisaAluno controladorPesquisaAluno =
       ControladorPesquisaAluno();
   ControladorPesquisaPlanos controladorPesquisaPlanos =
       ControladorPesquisaPlanos();
   ScrollController scrollController = ScrollController();
-  final textController = TextEditingController();
+  TextEditingController textController = TextEditingController();
   double total = 0;
 
+  DateTime _inicio = new DateTime.now();
+  DateTime _lancamento = new DateTime.now();
+
+
+  @override
+  void dispose() {
+    textController.dispose();
+    scrollController.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
-    double soma = 0;
-    _controladorCarrinho.listaProdutos.forEach((element) {
-      soma += element.valorFinal * element.quantidade;
-      total = soma;
-      _controladorCarrinho.totalProdutos = total;
-    });
     _controladorCarrinho.numProd.value =
         _controladorCarrinho.listaProdutos.length;
     return Scaffold(
@@ -68,6 +73,9 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
         child: Container(
           child: Column(
             children: <Widget>[
+              Container(
+                height: 10,
+              ),
               BotaoPesquisaAluno(
                   aluno: _controladorCarrinho.aluno,
                   context: context,
@@ -76,9 +84,161 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                   onTap: (aluno) {
                     Navigator.pop(context);
                     setState(() {
+                      textController = TextEditingController();
                       _controladorCarrinho.aluno = aluno;
                     });
                   }),
+              Column(
+                children: [
+                  if (_controladorCarrinho.plano != null)
+                    Card(
+                      elevation: 1,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(10),
+                              bottomRight: Radius.circular(10),
+                              bottomLeft: Radius.circular(10),
+                              topLeft: Radius.circular(10))),
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.symmetric(horizontal: 20),
+                            height: 70,
+                            decoration: BoxDecoration(color: Colors.white),
+                            child: Column(
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 14),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 25),
+                                        child: Text("Data de Início",
+                                            style: TextStyle(
+                                                fontFamily: 'NunitoSans',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16)),
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 50),
+                                        child: Text("Lançamento",
+                                            style: TextStyle(
+                                                color: Color(0XFFA0A0A0),
+                                                fontFamily: 'NunitoSans',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16)),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 25),
+                                      child: Container(
+                                        height: 30,
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                                "${formatDate(_inicio, [
+                                                      dd,
+                                                      '-',
+                                                      mm,
+                                                      '-',
+                                                      yyyy
+                                                    ])}",
+                                                style: TextStyle(
+                                                    fontFamily: 'NunitoSans',
+                                                    fontSize: 16)),
+                                            IconButton(
+                                                onPressed: () async {
+                                                  final dtPick =
+                                                      await showDatePicker(
+                                                          context: context,
+                                                          initialDate:
+                                                              DateTime.now(),
+                                                          firstDate:
+                                                              DateTime(1900),
+                                                          lastDate:
+                                                              DateTime(2100));
+
+                                                  if (dtPick != null &&
+                                                      dtPick != _inicio) {
+                                                    setState(() {
+                                                      _inicio = dtPick;
+                                                    });
+                                                  }
+                                                },
+                                                icon: Icon(
+                                                  Icons.calendar_today_outlined,
+                                                  size: 18,
+                                                  color: Color(0XFF60380E3),
+                                                )),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(),
+                                      child: Container(
+                                        height: 30,
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                                "${formatDate(_lancamento, [
+                                                      dd,
+                                                      '-',
+                                                      mm,
+                                                      '-',
+                                                      yyyy
+                                                    ])}",
+                                                style: TextStyle(
+                                                    fontFamily: 'NunitoSans',
+                                                    fontSize: 16)),
+                                            IconButton(
+                                                onPressed: () async {
+                                                  final dtPick =
+                                                      await showDatePicker(
+                                                          context: context,
+                                                          initialDate:
+                                                              DateTime.now(),
+                                                          firstDate:
+                                                              DateTime(1900),
+                                                          lastDate:
+                                                              DateTime(2100));
+
+                                                  if (dtPick != null &&
+                                                      dtPick != _lancamento) {
+                                                    setState(() {
+                                                      _lancamento = dtPick;
+                                                    });
+                                                  }
+                                                },
+                                                icon: Icon(
+                                                  Icons.calendar_today_outlined,
+                                                  size: 18,
+                                                  color: Color(0XFF60380E3),
+                                                )),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                ],
+              ),
               Container(
                 padding: EdgeInsets.all(2),
                 color: Colors.white,
@@ -132,6 +292,7 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                                       textController, (plano) {
                                     Navigator.pop(context);
                                     setState(() {
+                                      textController = TextEditingController();
                                       _controladorCarrinho.plano = plano;
                                     });
                                   });
@@ -256,14 +417,18 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                                   DialogoBusca.dialogoBuscaProdutos(
                                       context,
                                       controladorPesquisaProdutos,
-                                      textController, () {
+                                      textController,
+                                      (plano) {}, () {
+                                    textController = TextEditingController();
                                     controladorPesquisaProdutos =
-                                        new ControladorPesquisaProdutos();
+                                        new ControladorPesquisaProdutos(
+                                            diaria: false);
                                     Navigator.pop(context);
                                     setState(() {});
                                   }, () {
                                     controladorPesquisaProdutos =
-                                        new ControladorPesquisaProdutos();
+                                        new ControladorPesquisaProdutos(
+                                            diaria: false);
                                   });
                                 },
                               ),
@@ -339,6 +504,7 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                                         context: context,
                                         builder: (builder) {
                                           return Container(
+                                            height: 125,
                                             decoration: BoxDecoration(
                                               borderRadius: BorderRadius.only(
                                                   topLeft: Radius.circular(16),
@@ -500,15 +666,16 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                         _servicosPlano
                             .fecharVenda(_controladorCarrinho.plano!.codigo)
                             .then((plano) {
-                          _controladorCarrinho.plano!.nrParcelas =
-                              plano.nrParcelas;
                           _controladorCarrinho.plano!.valorFinal =
                               plano.valorFinal;
+                          _controladorCarrinho.datainicio = _inicio;
+                          _controladorCarrinho.lancamento = _lancamento;
                           Navigator.of(context).pop();
-                          Navigator.pushNamed(context, "/telaFechamentoVenda");
+                          Navigator.pushReplacementNamed(
+                              context, "/telaFechamentoVenda");
                         });
                       } else
-                        Navigator.pushNamed(
+                        Navigator.pushReplacementNamed(
                             context, "/telaFechamentoVendaProdutos");
                     }
                   : null,
@@ -621,21 +788,22 @@ class CardPlano extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 5, left: 19, right: 19),
                   ),
-                  Row(
-                    children: [
-                      Text("Anuidade",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontFamily: 'NunitoSans',
-                              fontSize: 12)),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text("${plano!.valorAnuidade.toStringAsFixed(2)}",
-                          style:
-                              TextStyle(fontFamily: 'NunitoSans', fontSize: 12))
-                    ],
-                  ),
+                  if (plano!.valorAnuidade != null)
+                    Row(
+                      children: [
+                        Text("Anuidade",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontFamily: 'NunitoSans',
+                                fontSize: 12)),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Text("${plano!.valorAnuidade!.toStringAsFixed(2)}",
+                            style: TextStyle(
+                                fontFamily: 'NunitoSans', fontSize: 12))
+                      ],
+                    ),
                 ],
               ),
             ),

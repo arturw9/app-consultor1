@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 
 class FieldLoginUsuario extends StatelessWidget {
   final Function(String text) onChanged;
@@ -109,29 +111,26 @@ class _FieldLoginSenhaState extends State<FieldLoginSenha> {
   }
 }
 
-class FieldLancarDiaria extends StatelessWidget {
+class FieldLancarDesconto extends StatelessWidget {
   final Function(String text) onChanged;
-  const FieldLancarDiaria({Key? key, required this.onChanged})
+  const FieldLancarDesconto({Key? key, required this.onChanged})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       onChanged: onChanged,
-      keyboardType: TextInputType.phone,
-      style: TextStyle(
-        fontSize: 15,
-        fontFamily: 'NunitoSans',
-      ),
-      decoration: InputDecoration(
-        suffixIcon: Icon(Icons.add_task_rounded),
-        prefixText: r'R$ ',
-        border: OutlineInputBorder(borderSide: BorderSide.none),
-        hintText: '00,00',
-        labelStyle: TextStyle(
-          fontSize: 25,
-          fontFamily: 'NunitoSansBold',
+      inputFormatters: <TextInputFormatter>[
+        CurrencyTextInputFormatter(
+          locale: 'pt',
+          decimalDigits: 2,
+          symbol: r'R$ ',
         ),
+      ],
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(borderSide: BorderSide.none),
+        suffixIcon: Icon(Icons.add_task_rounded),
       ),
     );
   }

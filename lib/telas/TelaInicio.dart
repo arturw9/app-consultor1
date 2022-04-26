@@ -15,42 +15,51 @@ class _TelaInicioState extends State<TelaInicio> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.white,
-          toolbarHeight: 74,
-          flexibleSpace: PerfilBarra(),
-        ),
-        bottomNavigationBar: AppBarra(iconeNavegacao: IconeNavegacao.home),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: Wrap(
-                spacing: 20,
-                runSpacing: 16,
-                children: [
-                  //chama os componentes de card do inicio
-                  CartaoInicio(
-                    child: ConteudoBuscarAluno(),
-                  ),
-                  CartaoInicio(
-                    child: ConteudoCadastro(),
-                  ),
-                  CartaoInicio(
-                    child: ConteudoVendasPlanos(),
-                  ),
-                  CartaoInicio(
-                    child: ConteudoVendasProdutos(),
-                  ),
-                  CartaoInicio(
-                    child: ConteudoLancarDiaria(),
-                  ),
-                ],
-              ),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        toolbarHeight: 74,
+        flexibleSpace: PerfilBarra(),
+      ),
+      bottomNavigationBar: AppBarra(iconeNavegacao: IconeNavegacao.home),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Wrap(
+              spacing: 20,
+              runSpacing: 16,
+              children: [
+                //chama os componentes de card do inicio
+                CartaoInicio(
+                  child: ConteudoBuscarAluno(),
+                ),
+                CartaoInicio(
+                  child: ConteudoCadastro(),
+                ),
+                CartaoInicio(
+                  child: ConteudoVendasPlanos(),
+                ),
+                CartaoInicio(
+                  child: ConteudoVendasProdutos(),
+                ),
+                CartaoInicio(
+                  child: ConteudoLancarDiaria(),
+                ),
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          Navigator.pushReplacementNamed(context, "/telaChat");
+        },
+        label: const Text('Chat'),
+        icon: const Icon(Icons.chat_sharp),
+        backgroundColor: Colors.blueAccent,
+      ),
+    );
   }
 }

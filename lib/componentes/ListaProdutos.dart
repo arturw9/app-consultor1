@@ -1,3 +1,4 @@
+import 'package:app_consultor/controladores/ControladorLancarDiaria.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
@@ -10,18 +11,21 @@ import 'ProdutoWidget.dart';
 
 // ignore: must_be_immutable
 class ListaProdutos extends StatelessWidget {
+  ValueChanged<Produto>? onTap;
   final produtos = <Produto>[];
   final listaVazia = ValueNotifier<bool>(true);
   ControladorCarrinho _controladorCarrinho = GetIt.I.get<ControladorCarrinho>();
+  ControladorLancarDiaria _controladorLancarDiaria =
+      GetIt.I.get<ControladorLancarDiaria>();
   ScrollController scrollController;
   ControladorPesquisaProdutos controlador;
-
   Function? onClose;
   ListaProdutos(
       {Key? key,
       required this.scrollController,
       required this.controlador,
-      this.onClose})
+      this.onClose,
+      this.onTap})
       : super(key: key);
   double posicaoScroll = 0.0;
 
@@ -37,8 +41,15 @@ class ListaProdutos extends StatelessWidget {
       }
     });
     switch (estado) {
-      case PesquisaEstado.carregando:
+      case PesquisaEstado.carregarConteudo:
         controlador.pesquisaProdutos();
+        return Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 7,
+          ),
+        );
+
+      case PesquisaEstado.carregando:
         return Center(
           child: CircularProgressIndicator(
             strokeWidth: 7,
@@ -53,10 +64,12 @@ class ListaProdutos extends StatelessWidget {
           },
           child: Scaffold(
             body: ListBuilderProdutos(
-                scrollController: scrollController,
-                controlador: controlador,
-                listaVazia: listaVazia,
-                produtos: produtos),
+              scrollController: scrollController,
+              controlador: controlador,
+              listaVazia: listaVazia,
+              produtos: produtos,
+              onTap: onTap,
+            ),
             bottomNavigationBar: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
@@ -88,12 +101,18 @@ class ListaProdutos extends StatelessWidget {
                               onPressed: produtos.isNotEmpty
                                   ? () {
                                       bool achou = false;
-                                      if (_controladorCarrinho
-                                          .listaProdutos.isNotEmpty) {
+                                      if (controlador.diaria == false
+                                          ? _controladorCarrinho
+                                              .listaProdutos.isNotEmpty
+                                          : _controladorLancarDiaria
+                                              .listaProdutos.isNotEmpty) {
                                         for (final prod in produtos) {
                                           for (final carr
-                                              in _controladorCarrinho
-                                                  .listaProdutos) {
+                                              in controlador.diaria == false
+                                                  ? _controladorCarrinho
+                                                      .listaProdutos
+                                                  : _controladorLancarDiaria
+                                                      .listaProdutos) {
                                             if (carr.codigo == prod.codigo) {
                                               achou = true;
                                               carr.quantidade +=
@@ -102,22 +121,31 @@ class ListaProdutos extends StatelessWidget {
                                             }
                                           }
                                           if (!achou)
-                                            _controladorCarrinho.listaProdutos
-                                                .add(prod);
+                                            controlador.diaria == false
+                                                ? _controladorCarrinho
+                                                    .listaProdutos
+                                                    .add(prod)
+                                                : _controladorLancarDiaria
+                                                    .listaProdutos
+                                                    .add(prod);
                                           else
                                             achou = false;
                                         }
                                       } else
-                                        _controladorCarrinho.listaProdutos =
-                                            produtos;
+                                        controlador.diaria == false
+                                            ? _controladorCarrinho
+                                                .listaProdutos = produtos
+                                            : _controladorLancarDiaria
+                                                .listaProdutos = produtos;
                                       onClose == null
                                           ? Navigator.pushReplacementNamed(
                                               context, "/telaCarrinho")
                                           : onClose!();
 
-                                      _controladorCarrinho.numProd.value =
-                                          _controladorCarrinho
-                                              .listaProdutos.length;
+                                      if (controlador.diaria == false)
+                                        _controladorCarrinho.numProd.value =
+                                            _controladorCarrinho
+                                                .listaProdutos.length;
                                     }
                                   : null,
                               icon: Icon(Icons.refresh),
@@ -190,12 +218,14 @@ class ListBuilderProdutos extends StatelessWidget {
   final ValueNotifier<bool> listaVazia;
   final ScrollController scrollController;
   final ControladorPesquisaProdutos controlador;
+  final ValueChanged<Produto>? onTap;
   const ListBuilderProdutos({
     Key? key,
     required this.scrollController,
     required this.controlador,
     required this.listaVazia,
     required this.produtos,
+    this.onTap,
   }) : super(key: key);
 
   @override
@@ -206,21 +236,27 @@ class ListBuilderProdutos extends StatelessWidget {
       itemCount: controlador.listaProduto!.length,
       itemBuilder: (BuildContext context, int index) {
         final Produto produto = controlador.listaProduto![index];
-        return ProdutoWidget(
-          produto: produto,
-          adicionarUm: () {
-            if (produto.quantidade == 0) {
-              produtos.add(produto);
-            }
-            listaVazia.value = produtos.isEmpty;
-          },
-          removerUm: () {
-            if (produto.quantidade == 1) {
-              produtos.remove(produto);
-            }
-            listaVazia.value = produtos.isEmpty;
-          },
-        );
+        return controlador.diaria == false
+            ? ProdutoWidget(
+                produto: produto,
+                adicionarUm: () {
+                  if (produto.quantidade == 0) {
+                    produtos.add(produto);
+                  }
+                  listaVazia.value = produtos.isEmpty;
+                },
+                removerUm: () {
+                  if (produto.quantidade == 1) {
+                    produtos.remove(produto);
+                  }
+                  listaVazia.value = produtos.isEmpty;
+                },
+              )
+            : GestureDetector(
+                onTap: () {
+                  onTap!(produto);
+                },
+                child: ProdutoDiariaWidget(produto: produto));
       },
       separatorBuilder: (BuildContext context, int index) => const Divider(),
     );

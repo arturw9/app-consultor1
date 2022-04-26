@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:app_consultor/componentes/ListaMolidades.dart';
-import 'package:app_consultor/componentes/Situacao.dart';
 import 'package:app_consultor/controladores/ControladorCarrinho.dart';
 import 'package:app_consultor/controladores/ControladorPesquisaAlunos.dart';
 import 'package:app_consultor/controladores/ControladorPesquisaPlanos.dart';
@@ -10,12 +9,14 @@ import 'package:app_consultor/controladores/controladorPesquisaModalidades.dart'
 import 'package:app_consultor/modelos/Aluno.dart';
 import 'package:app_consultor/modelos/Modalidade.dart';
 import 'package:app_consultor/modelos/Plano.dart';
+import 'package:app_consultor/modelos/Produto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'ListaAlunos.dart';
 import 'ListaPlanos.dart';
 import 'ListaProdutos.dart';
 import 'PesquisaBarra.dart';
+import 'Situacao.dart';
 
 class BotaoPesquisaAluno extends StatelessWidget {
   final Aluno? aluno;
@@ -181,42 +182,44 @@ class BotaoPesquisaModalidades extends StatelessWidget {
             textController: textController,
             modalidade: modalidade,
           )
-        : Container(
-            color: Colors.transparent,
-            width: 360,
-            height: 45,
-            child: ElevatedButton(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 4, right: 4),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Selecione uma Modalidade",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: "NunitoSans",
-                          fontSize: 16,
-                        ),
-                      ),
-                      Icon(
-                        //Icons.autorenew_sharp
-                        Icons.add_rounded,
-                        color: Colors.black,
-                        size: 25,
-                      ),
-                    ]),
-              ),
-              onPressed: () {
-                ControladorPesquisaModalidades controlador =
-                    ControladorPesquisaModalidades();
-                DialogoBusca.dialogoBuscaModalidades(
-                    context, controlador, textController, onTap);
-              },
-              style: ElevatedButton.styleFrom(
-                  primary: Color(0XFFFAFAFA),
-                  side: BorderSide(width: 2, color: Color(0XFF0380E3))),
-            ));
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Container(
+                color: Colors.transparent,
+                height: 45,
+                child: ElevatedButton(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 4, right: 4),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Selecione uma Modalidade",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: "NunitoSans",
+                              fontSize: 16,
+                            ),
+                          ),
+                          Icon(
+                            //Icons.autorenew_sharp
+                            Icons.add_rounded,
+                            color: Colors.black,
+                            size: 25,
+                          ),
+                        ]),
+                  ),
+                  onPressed: () {
+                    ControladorPesquisaModalidades controlador =
+                        ControladorPesquisaModalidades();
+                    DialogoBusca.dialogoBuscaModalidades(
+                        context, controlador, textController, onTap);
+                  },
+                  style: ElevatedButton.styleFrom(
+                      primary: Color(0XFFFAFAFA),
+                      side: BorderSide(width: 2, color: Color(0XFF0380E3))),
+                )),
+          );
   }
 }
 
@@ -250,9 +253,14 @@ class DialogoBusca {
               child: Scaffold(
                 backgroundColor: Colors.transparent,
                 appBar: PesquisaBarra(
+                    onClear: () => Navigator.of(context).pop(),
                     onSubmitted: (text) {
                       controladorPesquisaAluno.pesquisaAluno(
-                          aluno: textController.text);
+                          aluno: text.toString());
+                    },
+                    onChanged: (text) {
+                      controladorPesquisaAluno.pesquisaAluno(
+                          aluno: text.toString());
                     },
                     textController: textController),
                 body: DraggableScrollableSheet(
@@ -298,7 +306,12 @@ class DialogoBusca {
               child: Scaffold(
                 backgroundColor: Colors.transparent,
                 appBar: PesquisaBarra(
+                    onClear: () => Navigator.of(context).pop(),
                     onSubmitted: (text) {
+                      controladorModalidades.pesquisaModalidade(
+                          modalidade: textController.text);
+                    },
+                    onChanged: (text) {
                       controladorModalidades.pesquisaModalidade(
                           modalidade: textController.text);
                     },
@@ -347,9 +360,14 @@ class DialogoBusca {
               child: Scaffold(
                 backgroundColor: Colors.transparent,
                 appBar: PesquisaBarra(
+                    onClear: () => Navigator.of(context).pop(),
                     onSubmitted: (text) {
                       controladorPesquisaPlanos.pesquisaPlano(
                           plano: textController.text);
+                    },
+                    onChanged: (text) {
+                      controladorPesquisaPlanos.pesquisaPlano(
+                          plano: text.toString());
                     },
                     textController: textController),
                 body: DraggableScrollableSheet(
@@ -370,6 +388,7 @@ class DialogoBusca {
     BuildContext context,
     ControladorPesquisaProdutos controladorPesquisaProdutos,
     TextEditingController textController,
+    Function(Produto proututo) ontap,
     Function onClose, //executa quando a modal é fechada apertando botão
     Function onComplete, //executa quando a modal é fechada sem apertar o botão
   ) {
@@ -394,7 +413,12 @@ class DialogoBusca {
               child: Scaffold(
                 backgroundColor: Colors.transparent,
                 appBar: PesquisaBarra(
+                    onClear: () => Navigator.of(context).pop(),
                     onSubmitted: (text) {
+                      controladorPesquisaProdutos.pesquisaProdutos(
+                          produto: textController.text);
+                    },
+                    onChanged: (text) {
                       controladorPesquisaProdutos.pesquisaProdutos(
                           produto: textController.text);
                     },
@@ -403,6 +427,7 @@ class DialogoBusca {
                     initialChildSize: 1,
                     builder: (_, scrollController) {
                       return ListaProdutos(
+                          onTap: ontap,
                           onClose: onClose,
                           scrollController: scrollController,
                           controlador: controladorPesquisaProdutos);
@@ -493,7 +518,18 @@ class CardAluno extends StatelessWidget {
                     // )
                   ],
                 ),
-                SituacaoWidget(aluno: aluno!)
+                Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    textDirection: TextDirection.rtl,
+                    children: [
+                      if (aluno!.situacaoContrato != null)
+                        Situacao(tipo: aluno!.situacaoContrato!),
+                      if (aluno!.situacao != null)
+                        Situacao(tipo: aluno!.situacao!),
+                    ],
+                  ),
+                ),
               ],
             ),
           )
@@ -517,50 +553,49 @@ class CardModalidade extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        color: Colors.transparent,
-        width: 360,
-        height: 45,
-        child: ElevatedButton(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 4, right: 4),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Container(
-                      color: Colors.blue,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Container(
+          color: Colors.transparent,
+          height: 45,
+          child: ElevatedButton(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8, right: 8),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.7,
                       child: Text(
                         modalidade!.nome.toString(),
                         style: TextStyle(
+                          overflow: TextOverflow.ellipsis,
                           color: Colors.black,
                           fontFamily: "NunitoSans",
                           fontSize: 16,
                         ),
                       ),
                     ),
-                  ),
-                  Container(
-                    color: Colors.red,
-                    child: Icon(
-                      Icons.autorenew_sharp,
-                      //Icons.add_rounded,
-                      color: Colors.black,
-                      size: 25,
+                    Container(
+                      child: Icon(
+                        Icons.autorenew_sharp,
+                        //Icons.add_rounded,
+                        color: Colors.black,
+                        size: 25,
+                      ),
                     ),
-                  ),
-                ]),
-          ),
-          onPressed: () {
-            ControladorPesquisaModalidades controlador =
-                ControladorPesquisaModalidades();
-            DialogoBusca.dialogoBuscaModalidades(
-                context, controlador, textController, onTap);
-          },
-          style: ElevatedButton.styleFrom(
-              primary: Color(0XFFFAFAFA),
-              side: BorderSide(width: 2, color: Color(0XFF2EC750))),
-        ));
+                  ]),
+            ),
+            onPressed: () {
+              ControladorPesquisaModalidades controlador =
+                  ControladorPesquisaModalidades();
+              DialogoBusca.dialogoBuscaModalidades(
+                  context, controlador, textController, onTap);
+            },
+            style: ElevatedButton.styleFrom(
+                primary: Color(0XFFFAFAFA),
+                side: BorderSide(width: 2, color: Color(0XFF2EC750))),
+          )),
+    );
   }
 }

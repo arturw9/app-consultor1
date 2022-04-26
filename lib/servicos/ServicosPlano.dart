@@ -3,7 +3,6 @@ import 'package:app_consultor/controladores/ControladorUsuario.dart';
 import 'package:app_consultor/util/RetornoApiFecharVenda.dart';
 import 'package:app_consultor/util/RetornoApiModalidade.dart';
 import 'package:app_consultor/util/RetornoApiPlano.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 
@@ -12,13 +11,12 @@ ControladorUsuario _controladorUsuario = GetIt.I.get<ControladorUsuario>();
 class ServicosPlano {
   Future<RetornoApiPlano> pesquisaPlanos(
       {String plano = "", String pagina = "0", required Function erro}) async {
-    //aceita o parametro de pesquisa e o valor da pagina atual
-    String filterJson =
-        '{"quicksearchValue": "$plano" ,"tipo":["recorrencia"],"status":["true"]}';
-
+    String filterJson = '{"quicksearchValue": "$plano" ,"ativo":"true"}';
+    var planoMsUrl =
+        GetIt.I.get<ControladorUsuario>().urlsServicos.planoMsUrl.toString();
     var urlPesquisa = Uri.encodeFull(filterJson);
-    var url = Uri.parse(dotenv.env['urlBuscaPlano'].toString() +
-        "page=$pagina&size=20&filters=$urlPesquisa");
+    var url = Uri.parse(
+        planoMsUrl + "/planos?page=$pagina&size=20&filters=$urlPesquisa");
     var response = await http.get(url, headers: {
       'Authorization': _controladorUsuario.usuario.token.toString(),
       'empresaId': _controladorUsuario.usuario.unidade!.codigo.toString(),
@@ -28,7 +26,11 @@ class ServicosPlano {
         GetIt.I.get<ControladorUsuario>().autenticarUsuario(erro: (erro) {
           throw (erro);
         }, sucesso: () {
-          pesquisaPlanos(erro: () {});
+          pesquisaPlanos(
+            plano: plano,
+            erro: erro,
+            pagina: pagina,
+          );
         });
       } catch (e) {
         throw (e);
@@ -38,8 +40,11 @@ class ServicosPlano {
   }
 
   Future<RetornoApiFecharVenda> fecharVenda(int plano) async {
-    var url = Uri.parse(
-        "${dotenv.env['urlFecharVenda']}${_controladorUsuario.usuario.key}/simular/$plano/${_controladorUsuario.usuario.unidade!.codigo.toString()}");
+    var zwApiUrl =
+        GetIt.I.get<ControladorUsuario>().urlsServicos.apiZwUrl.toString();
+    var chave = _controladorUsuario.usuario.key;
+    var empresa = _controladorUsuario.usuario.unidade!.codigo.toString();
+    var url = Uri.parse("$zwApiUrl/v2/vendas/$chave/simular/$plano/$empresa");
     var response = await http.post(url).timeout(Duration(seconds: 10));
 
     return RetornoApiFecharVenda.fromJson(response.body);
@@ -49,8 +54,10 @@ class ServicosPlano {
       String modalidade) async {
     String filterJson = '{"quicksearchValue": "$modalidade" }';
     var urlPesquisa = Uri.encodeFull(filterJson);
-    var url = Uri.parse(
-        "http://swarm-42.pactosolucoes.com.br:8310/modalidades/only-cod-name?filters=$urlPesquisa");
+    var planoMsUrl =
+        GetIt.I.get<ControladorUsuario>().urlsServicos.planoMsUrl.toString();
+    var url =
+        Uri.parse("$planoMsUrl/modalidades/only-cod-name?filters=$urlPesquisa");
     var response = await http.get(url, headers: {
       'Authorization': _controladorUsuario.usuario.token.toString(),
       'empresaId': _controladorUsuario.usuario.unidade!.codigo.toString(),

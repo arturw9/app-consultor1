@@ -17,8 +17,14 @@ class ListaModalidades extends StatelessWidget {
 
   gereciadorEstado(PesquisaEstado estado) {
     switch (estado) {
-      case PesquisaEstado.carregando:
+      case PesquisaEstado.carregarConteudo:
         controlador.pesquisaModalidade();
+        return Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 7,
+          ),
+        );
+      case PesquisaEstado.carregando:
         return Center(
           child: CircularProgressIndicator(
             strokeWidth: 7,

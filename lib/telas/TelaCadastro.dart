@@ -7,6 +7,7 @@ import 'package:app_consultor/controladores/ControladorCarrinho.dart';
 import 'package:app_consultor/controladores/ControladorUsuario.dart';
 import 'package:app_consultor/modelos/Cliente.dart';
 import 'package:app_consultor/telas/TelaCarrinho.dart';
+import 'package:app_consultor/util/UtilCarregamento.dart';
 import 'package:app_consultor/util/UtilDialog.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -202,6 +203,9 @@ class _TelaCadastroState extends State<TelaCadastro> {
                 },
               ),
               FieldDataNasc(
+                // onSelectedDate: (text) {
+                //   _cliente.dataNascimento = (text);
+                // }
                 onSelected: (text) {
                   _cliente.dataNascimento = DateFormat.yMd('pt_BR').parse(text);
                   //  FormatarData.convertStringToDate(text);
@@ -228,10 +232,11 @@ class _TelaCadastroState extends State<TelaCadastro> {
               _cliente.empresa = _controladorUsuario.usuario.unidade!.codigo;
 
               if (formKey.currentState?.validate() == true) {
+                UtilCarregamento.exibirCarregamento(context);
                 _controladorUsuario.cadastrarCliente(
                   _cliente,
                   sucesso: (aluno) {
-                    // Navigator.pushReplacementNamed(context, "/telaCarrinho");
+                    Navigator.of(context).pop();
                     _controladorCarrinho.aluno = aluno;
                     Navigator.of(context)
                         .push(MaterialPageRoute(
@@ -240,6 +245,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         .then((_) => formKey.currentState?.reset());
                   },
                   erro: (mensagem) {
+                    Navigator.of(context).pop();
                     UtilDialog.exibirInformacoes(context,
                         titulo: "Ops!", mensagem: mensagem);
                   },

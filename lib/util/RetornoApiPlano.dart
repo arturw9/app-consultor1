@@ -27,6 +27,10 @@ class RetornoApiPlano {
   String toJson() => json.encode(toMap());
 
   factory RetornoApiPlano.fromJson(String source) {
-    return RetornoApiPlano.fromMap(json.decode(source));
+    try {
+      return RetornoApiPlano.fromMap(json.decode(source));
+    } catch (e) {
+      throw e;
+    }
   }
 }

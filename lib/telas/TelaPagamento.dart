@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:app_consultor/componentes/ButtonPadrao.dart';
-import 'package:app_consultor/controladores/ControladorCarrinho.dart';
+import 'package:app_consultor/componentes/ShowAlertDialog.dart';
+import 'package:app_consultor/controladores/ControladorPagamento.dart';
 import 'package:app_consultor/controladores/ControladorUsuario.dart';
 import 'package:app_consultor/modelos/Usuario.dart';
 import 'package:flutter/material.dart';
@@ -15,12 +16,12 @@ class TelaPagamento extends StatefulWidget {
   _TelaPagamentoState createState() => _TelaPagamentoState();
 }
 
-ControladorCarrinho _controladorCarrinho = GetIt.I.get<ControladorCarrinho>();
-Usuario usuario = GetIt.I.get<ControladorUsuario>().usuario;
-
-ControladorUsuario _controladorUsuario = GetIt.I.get<ControladorUsuario>();
-
 class _TelaPagamentoState extends State<TelaPagamento> {
+  ControladorPagamento _controladorPagamento =
+      GetIt.I.get<ControladorPagamento>();
+  Usuario usuario = GetIt.I.get<ControladorUsuario>().usuario;
+  bool isChecked = false;
+  ControladorUsuario _controladorUsuario = GetIt.I.get<ControladorUsuario>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,7 +116,7 @@ class _TelaPagamentoState extends State<TelaPagamento> {
                     onPressed: () {
                       // K é a chave que retorna na autenticação, UN é o codigo da empresa e CLIENTE é o código do cliente
                       Share.share(
-                          'https://vendas.online.sistemapacto.com.br/pagamento?un=${_controladorUsuario.usuario.key}&k=${_controladorUsuario.usuario.token}&cliente=${_controladorCarrinho.aluno!.codigo}');
+                          'https://vendas.online.sistemapacto.com.br/pagamento?un=${_controladorUsuario.usuario.key}&k=${_controladorUsuario.usuario.token}&cliente=${_controladorPagamento.aluno!.codigo}');
                     },
                     style: ButtonStyle(
                         shape:
@@ -131,6 +132,26 @@ class _TelaPagamentoState extends State<TelaPagamento> {
                           fontFamily: "NunitoSans",
                           fontSize: 14,
                         ))),
+              ),
+              CheckboxListTile(
+                title: Text(
+                  "Recebimento via dinheiro",
+                  style: TextStyle(
+                    color: Color(0XFF0380E3),
+                    fontFamily: "NunitoSans",
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                value: isChecked,
+                onChanged: (newValue) {
+                  setState(() {
+                    isChecked = newValue!;
+                    showAlertDialog(context);
+                  });
+                },
+                controlAffinity:
+                    ListTileControlAffinity.leading, //  <-- leading Checkbox
               ),
               Container(
                   child: Column(
@@ -165,19 +186,20 @@ class _TelaPagamentoState extends State<TelaPagamento> {
                                 backgroundColor: Colors.transparent,
                                 radius: 52,
                                 backgroundImage:
-                                    _controladorCarrinho.aluno!.imageUri == null
+                                    _controladorPagamento.aluno!.imageUri ==
+                                            null
                                         ? null
-                                        : NetworkImage(_controladorCarrinho
+                                        : NetworkImage(_controladorPagamento
                                             .aluno!.imageUri
                                             .toString()),
-                                child:
-                                    _controladorCarrinho.aluno!.imageUri == null
-                                        ? SvgPicture.asset(
-                                            "assets/images/fotoPadrao.svg",
-                                            allowDrawingOutsideViewBox: true,
-                                            height: 160,
-                                          )
-                                        : null,
+                                child: _controladorPagamento.aluno!.imageUri ==
+                                        null
+                                    ? SvgPicture.asset(
+                                        "assets/images/fotoPadrao.svg",
+                                        allowDrawingOutsideViewBox: true,
+                                        height: 160,
+                                      )
+                                    : null,
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(left: 12),
@@ -194,7 +216,7 @@ class _TelaPagamentoState extends State<TelaPagamento> {
                                             MediaQuery.of(context).size.width *
                                                 0.45,
                                         child: Text(
-                                          _controladorCarrinho.aluno!.nome
+                                          _controladorPagamento.aluno!.nome
                                               .toString(),
                                           style: TextStyle(
                                             color: Colors.black,
@@ -208,8 +230,8 @@ class _TelaPagamentoState extends State<TelaPagamento> {
                                       height: 12,
                                     ),
                                     Text(
-                                      "Matrícula: ${_controladorCarrinho.aluno!.matricula}",
-                                      //   "Matrícula: ${_controladorCarrinho.plano!.modalidades[0].codigo}",
+                                      "Matrícula: ${_controladorPagamento.aluno!.matricula}",
+                                      //   "Matrícula: ${_controladorPagamento.plano!.modalidades[0].codigo}",
                                       style: TextStyle(
                                           color: Colors.black,
                                           fontFamily: 'NunitoSans',
@@ -243,16 +265,19 @@ class _TelaPagamentoState extends State<TelaPagamento> {
                                 textAlign: TextAlign.start,
                               ),
                               Spacer(),
-                              if (_controladorCarrinho.plano != null)
-                                Text(
-                                  " R\$ ${_controladorCarrinho.plano!.valorFinal!.toStringAsFixed(2)}",
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 14,
-                                    fontFamily: 'NunitoSans',
-                                    fontWeight: FontWeight.bold,
+                              if (_controladorPagamento.plano != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 16),
+                                  child: Text(
+                                    " R\$ ${_controladorPagamento.plano!.valorFinal!.toStringAsFixed(2)}",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 14,
+                                      fontFamily: 'NunitoSans',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.start,
                                   ),
-                                  textAlign: TextAlign.start,
                                 )
                             ],
                           ),
@@ -272,12 +297,15 @@ class _TelaPagamentoState extends State<TelaPagamento> {
                                 textAlign: TextAlign.start,
                               ),
                               Spacer(),
-                              Text(
-                                  " R\$ ${_controladorCarrinho.totalProdutos.toStringAsFixed(2)}  ",
-                                  style: TextStyle(
-                                      fontFamily: 'NunitoSans',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14)),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 16),
+                                child: Text(
+                                    " R\$ ${_controladorPagamento.total!.toStringAsFixed(2)}  ",
+                                    style: TextStyle(
+                                        fontFamily: 'NunitoSans',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14)),
+                              ),
                             ],
                           ),
                         ),
@@ -302,14 +330,17 @@ class _TelaPagamentoState extends State<TelaPagamento> {
                                         fontFamily: 'NunitoSans'),
                                   ),
                                   Spacer(),
-                                  Text(
-                                    _controladorCarrinho.plano != null
-                                        ? "R\$ ${(_controladorCarrinho.totalProdutos + _controladorCarrinho.plano!.valorFinal!).toStringAsFixed(2)}"
-                                        : "R\$ ${_controladorCarrinho.totalProdutos.toStringAsFixed(2)}",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontFamily: 'NunitoSans',
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 16),
+                                    child: Text(
+                                      _controladorPagamento.plano != null
+                                          ? "R\$ ${(_controladorPagamento.total! + _controladorPagamento.plano!.valorFinal!).toStringAsFixed(2)}"
+                                          : "R\$ ${_controladorPagamento.total!.toStringAsFixed(2)}",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontFamily: 'NunitoSans',
+                                      ),
                                     ),
                                   ),
                                 ]),
@@ -350,7 +381,6 @@ class _TelaPagamentoState extends State<TelaPagamento> {
                       value: "VOLTAR PARA O INÍCIO",
                       onTap: () {
                         Navigator.pushReplacementNamed(context, "/telaInicio");
-                        GetIt.I.get<ControladorCarrinho>().limparCarrinho();
                       },
                     ),
                   ],

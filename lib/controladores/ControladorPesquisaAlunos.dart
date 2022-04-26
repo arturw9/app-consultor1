@@ -10,7 +10,7 @@ class ControladorPesquisaAluno {
   int paginasTotal = 0; //recebe o valor de paginas total da api
   int paginaAtual = -1; //armazena a pagina atual começando da primeira
   final pesquisaEstado = ValueNotifier<PesquisaEstado>(PesquisaEstado
-      .carregando); //declara um valueNotifier que ira informar quando o componente deve ser rebuildado
+      .carregarConteudo); //declara um valueNotifier que ira informar quando o componente deve ser rebuildado
   Future pesquisaAluno({String aluno = ""}) async {
     //realiza a busca do aluno, caso o nomeAluno esteja vazio, somente lista os alunos
     pesquisaEstado.value = PesquisaEstado.carregando;

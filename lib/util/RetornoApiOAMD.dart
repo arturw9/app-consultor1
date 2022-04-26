@@ -7,6 +7,8 @@ class RetornoApiOAMD {
   String nome;
   String urlFoto;
   String userName;
+  String codigoColaborador;
+
   List<Unidade> listaUnidades;
   RetornoApiOAMD({
     required this.key,
@@ -14,6 +16,7 @@ class RetornoApiOAMD {
     required this.urlFoto,
     required this.userName,
     required this.listaUnidades,
+    required this.codigoColaborador,
   });
 
   Map<String, dynamic> toMap() {
@@ -22,6 +25,7 @@ class RetornoApiOAMD {
       'nome': nome,
       'urlFoto': urlFoto,
       'userName': userName,
+      'codigoColaborador': codigoColaborador,
     };
   }
 
@@ -32,6 +36,7 @@ class RetornoApiOAMD {
       nome: map['nome'],
       urlFoto: map['urlFoto'],
       userName: map['userName'],
+      codigoColaborador: map['codigo'].toString(),
 
       listaUnidades: listMap.toList(),
       //.map<Unidade>((resp)=> Unidade.fromMap(resp)

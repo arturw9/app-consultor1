@@ -1,8 +1,13 @@
 import 'package:app_consultor/componentes/ButtonPadrao.dart';
 import 'package:app_consultor/controladores/ControladorCarrinho.dart';
+import 'package:app_consultor/controladores/ControladorPagamento.dart';
 import 'package:app_consultor/controladores/ControladorUsuario.dart';
 import 'package:app_consultor/modelos/Produto.dart';
 import 'package:app_consultor/modelos/Usuario.dart';
+import 'package:app_consultor/modelos/Venda.dart';
+import 'package:app_consultor/servicos/ServicoVenda.dart';
+import 'package:app_consultor/util/UtilCarregamento.dart';
+import 'package:app_consultor/util/UtilDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
@@ -15,17 +20,17 @@ class TelaFechamentoVendaProdutos extends StatefulWidget {
       _TelaFechamentoVendaProdutosState();
 }
 
-ControladorCarrinho _controladorCarrinho = GetIt.I.get<ControladorCarrinho>();
-Usuario usuario = GetIt.I.get<ControladorUsuario>().usuario;
-
 class _TelaFechamentoVendaProdutosState
     extends State<TelaFechamentoVendaProdutos> {
+  ControladorCarrinho _controladorCarrinho = GetIt.I.get<ControladorCarrinho>();
+  Usuario usuario = GetIt.I.get<ControladorUsuario>().usuario;
   String str = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text("FECHAMENTO DA VENDA",
             style: TextStyle(
               fontFamily: 'NunitoSans',
@@ -337,7 +342,8 @@ class _TelaFechamentoVendaProdutosState
                     ButtonAlterarFechamentoVenda(
                       value: "ALTERAR",
                       onTap: () {
-                        Navigator.pushNamed(context, "/telaCarrinho");
+                        Navigator.pushReplacementNamed(
+                            context, "/telaCarrinho");
                       },
                     ),
                     SizedBox(
@@ -346,7 +352,31 @@ class _TelaFechamentoVendaProdutosState
                     ButtonConcluirFechamentoVenda(
                       value: "CONCLUIR",
                       onTap: () {
-                        Navigator.pushNamed(context, "/telaPagamento");
+                        Venda venda = Venda(
+                            unidade: 1,
+                            nome: _controladorCarrinho.aluno!.nome.toString(),
+                            cpf: _controladorCarrinho.aluno!.cpf.toString(),
+                            produtos: _controladorCarrinho.listaProdutos,
+                            diaVencimento: null,
+                            nrVezesDividir: null,
+                            plano: null);
+                        UtilCarregamento.exibirCarregamento(context);
+                        ServicoVenda.concluirVenda(venda).then((value) {
+                          GetIt.I.get<ControladorPagamento>().aluno =
+                              _controladorCarrinho.aluno;
+                          GetIt.I.get<ControladorPagamento>().total =
+                              _controladorCarrinho.totalProdutos;
+                          GetIt.I.resetLazySingleton<ControladorCarrinho>();
+                          Navigator.of(context).pop();
+                          Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              "/telaPagamento",
+                              (Route<dynamic> route) => false);
+                        }).catchError((erro) {
+                          Navigator.of(context).pop();
+                          UtilDialog.exibirInformacoes(context,
+                              titulo: "Ops!", mensagem: erro);
+                        });
                       },
                     ),
                   ],

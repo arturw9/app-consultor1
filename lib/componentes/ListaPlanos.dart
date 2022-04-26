@@ -29,8 +29,15 @@ class ListaPlanos extends StatelessWidget {
       }
     });
     switch (estado) {
+      case PesquisaEstado.carregarConteudo:
+         controlador.pesquisaPlano();
+         
+        return   Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 7,
+          ),
+        );
       case PesquisaEstado.carregando:
-        controlador.pesquisaPlano();
         return Center(
           child: CircularProgressIndicator(
             strokeWidth: 7,

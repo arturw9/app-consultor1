@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class ControladorPesquisaModalidades {
   List<Modalidade>? listaModalidade;
   final pesquisaEstado =
-      ValueNotifier<PesquisaEstado>(PesquisaEstado.carregando);
+      ValueNotifier<PesquisaEstado>(PesquisaEstado.carregarConteudo);
   Future pesquisaModalidade({String modalidade = ""}) async {
     //pesquisa o plano, caso não informado somente lista os planos
     pesquisaEstado.value = PesquisaEstado.carregando;

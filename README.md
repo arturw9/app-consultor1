@@ -19,21 +19,21 @@ Aplicativo Pacto para vendas de planos, produtos e atividades relacionadas
 
 * Millestone: Integração com api
 
-11. [ ] Api de cadastro de aluno: **Kévio**
-12. [ ] Login: Integração com api **Miguel** e **Geziel**
-13. [ ] Busca, pesquisa de alunos: Integração com api **Jefferson** e **Artur**
-14. [ ] Pesquisa de planos: Integração com api **Regis**, **Miguel** e **Geziel**
-15. [ ] Pesquisa de produtos: Integração com api **Jefferson** e **Artur**
-16. [ ] Cadastro do aluno: Falta deinir a tela
-17. [ ] Api de compra de plano: **Kévio**
-18. [ ] Api de compra de produto: **Kévio**
-19. [ ] Api de carrinho de compra: **Kévio**
+11. [X] Api de cadastro de aluno: **Kévio**
+12. [X] Login: Integração com api **Miguel** e **Geziel**
+13. [X] Busca, pesquisa de alunos: Integração com api **Jefferson** e **Artur**
+14. [X] Pesquisa de planos: Integração com api **Regis**, **Miguel** e **Geziel**
+15. [X] Pesquisa de produtos: Integração com api **Jefferson** e **Artur**
+16. [X] Cadastro do aluno: Falta deinir a tela
+17. [X] Api de compra de plano: **Kévio**
+18. [X] Api de compra de produto: **Kévio**
+19. [X] Api de carrinho de compra: **Kévio**
 
 * Millestone: Compra
 
-20. [ ] Compra de plano recorrente: A definir
-21. [ ] Compra de produto: A definir
-22. [ ] Carrinho de compra: A definir
+20. [X] Compra de plano recorrente: A definir
+21. [X] Compra de produto: A definir
+22. [X] Carrinho de compra: A definir
 
 * Millestone: Resisões e melhorias
 

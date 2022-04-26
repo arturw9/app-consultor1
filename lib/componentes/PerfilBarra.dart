@@ -1,10 +1,7 @@
-import 'package:app_consultor/controladores/ControladorCarrinho.dart';
 import 'package:app_consultor/controladores/ControladorUsuario.dart';
 import 'package:app_consultor/modelos/Usuario.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-
-Usuario usuario = GetIt.I.get<ControladorUsuario>().usuario;
 
 //implementa o statelessWidget com PreferredSizeWidget para que a appbar reconheça o widget
 class PerfilBarra extends StatelessWidget implements PreferredSizeWidget {
@@ -17,6 +14,7 @@ class PerfilBarra extends StatelessWidget implements PreferredSizeWidget {
       Size.fromHeight(76); // meterodo obrigatorio para sobreescrita
   @override
   Widget build(BuildContext context) {
+    Usuario usuario = GetIt.I.get<ControladorUsuario>().usuario;
     return Container(
       margin: MediaQuery.of(context).padding,
       width: MediaQuery.of(context).size.width,
@@ -95,8 +93,6 @@ class PerfilBarra extends StatelessWidget implements PreferredSizeWidget {
               fillColor: Colors.grey,
               shape: CircleBorder(),
               onPressed: () {
-                GetIt.I.unregister<ControladorCarrinho>();
-                GetIt.I.registerSingleton(ControladorCarrinho());
                 Navigator.pushNamed(context, "/telaUnidades");
               },
               child: Container(

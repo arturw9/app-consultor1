@@ -85,7 +85,7 @@ class Aluno {
           : null,
       observacoes: map['observacoes'] != null
           ? List<String>.from(
-              map['observacoes'].map((x) => x['mensagem'].toString()))
+              map['observacoes'].map((x) => x['observacao'].toString()))
           : null,
     );
   }

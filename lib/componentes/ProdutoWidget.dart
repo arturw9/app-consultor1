@@ -49,6 +49,7 @@ class _ProdutoWidgetState extends State<ProdutoWidget> {
               children: [
                 Text(
                   '${widget.produto.descricao}',
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       fontFamily: 'NunitoSans',
                       fontSize: 14,
@@ -102,6 +103,53 @@ class _ProdutoWidgetState extends State<ProdutoWidget> {
                   icon: Icon(
                     (Icons.add),
                   ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ProdutoDiariaWidget extends StatelessWidget {
+  final Produto produto;
+  const ProdutoDiariaWidget({Key? key, required this.produto})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width * 0.53,
+            child: Column(
+              //    mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${produto.descricao}',
+                  style: TextStyle(
+                      fontFamily: 'NunitoSans',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '\R\$ ${(produto.valorFinal).toStringAsFixed(2)}',
+                  style: TextStyle(
+                      fontFamily: 'NunitoSans',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '\cod. ${produto.codigo}',
+                  style: TextStyle(
+                      fontFamily: 'NunitoSans',
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold),
                 ),
               ],
             ),

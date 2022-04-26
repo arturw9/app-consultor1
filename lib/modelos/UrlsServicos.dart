@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class UrlsServicos {
   String? alunoMsUrl;
   String? loginMsUrl;
@@ -18,27 +20,33 @@ class UrlsServicos {
   String? relatorioFull;
   String? sinteticoMsUrl;
   String? pactoPayDashUrl;
+  String? apiZwUrl;
   String? cadastroAuxiliarUrl;
-  UrlsServicos({
-    this.alunoMsUrl,
-    this.loginMsUrl,
-    this.colaboradorMsUrl,
-    this.graduacaoMsUrl,
-    this.treinoApiUrl,
-    this.treinoUrl,
-    this.loginAppUrl,
-    this.oamdUrl,
-    this.zwUrl,
-    this.personagemMsUrl,
-    this.autenticacaoUrl,
-    this.frontPersonal,
-    this.planoMsUrl,
-    this.produtoMsUrl,
-    this.relatorioFull,
-    this.sinteticoMsUrl,
-    this.pactoPayDashUrl,
-    this.cadastroAuxiliarUrl,
-  });
+
+  UrlsServicos(
+      {this.alunoMsUrl,
+      this.loginMsUrl,
+      this.colaboradorMsUrl,
+      this.graduacaoMsUrl,
+      this.treinoApiUrl,
+      this.treinoUrl,
+      this.loginAppUrl,
+      this.oamdUrl,
+      this.zwUrl,
+      this.personagemMsUrl,
+      this.autenticacaoUrl,
+      this.frontPersonal,
+      this.planoMsUrl,
+      this.produtoMsUrl,
+      this.relatorioFull,
+      this.sinteticoMsUrl,
+      this.pactoPayDashUrl,
+      this.cadastroAuxiliarUrl,
+      this.apiZwUrl});
+
+  get clienteMsUrl => dotenv.env['prod'] == 'true'
+      ? planoMsUrl?.replaceAll('plano-ms', 'cliente-ms')
+      : alunoMsUrl;
 
   Map<String, dynamic> toMap() {
     return {
@@ -83,6 +91,7 @@ class UrlsServicos {
       sinteticoMsUrl: map['sinteticoMsUrl'],
       pactoPayDashUrl: map['pactoPayDashUrl'],
       cadastroAuxiliarUrl: map['cadastroAuxiliarUrl'],
+      apiZwUrl: map['apiZwUrl'],
     );
   }
 

@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 
 class PesquisaBarra extends StatelessWidget implements PreferredSizeWidget {
-  final Function(String? text)
+  final Function(String? text)?
       onSubmitted; //repassa a função de onSubmitted para o construtor do widget
+  final Function()? onClear;
+  final Function(String? text)? onChanged;
   final TextEditingController textController;
   final String? hintText; //repassa o hintText para o construtor do widget
   PesquisaBarra(
       {Key? key,
       this.hintText,
       required this.onSubmitted,
-      required this.textController})
+      required this.textController,
+      this.onChanged,
+      this.onClear})
       : super(key: key);
   @override
   Size get preferredSize => Size.fromHeight(76);
+  void dispose() {
+    textController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +28,15 @@ class PesquisaBarra extends StatelessWidget implements PreferredSizeWidget {
         margin: EdgeInsets.symmetric(horizontal: 16),
         height: 48,
         decoration: BoxDecoration(
-          color: Colors.white,
-        ),
+            color: Colors.white,
+            borderRadius: BorderRadius.all(
+              Radius.circular(40.0),
+            )),
         child: TextField(
+          onChanged: (text) {
+            if (text.isEmpty) return onChanged!(text);
+            if (text.length > 3 && onChanged != null) return onChanged!(text);
+          },
           onSubmitted: onSubmitted,
           controller: textController,
           textAlignVertical: TextAlignVertical.center,
@@ -31,6 +44,8 @@ class PesquisaBarra extends StatelessWidget implements PreferredSizeWidget {
             suffixIcon: IconButton(
               icon: Icon(Icons.cancel),
               onPressed: () {
+                if (textController.text == '' && onClear != null) onClear!();
+                onChanged!("");
                 textController.clear();
               },
             ),

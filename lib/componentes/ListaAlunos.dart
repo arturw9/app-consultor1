@@ -9,7 +9,6 @@ import 'package:app_consultor/util/EnumPesquisaEstado.dart';
 class ListaAlunos extends StatelessWidget {
   ScrollController scrollController;
   ControladorPesquisaAluno controlador;
-  bool primeiraPesquisa = true;
   ValueChanged<Aluno>
       onTap; //declara um ValueChanged do tipo aluno, que ira passar o dado informado na declaração do onTap(funcionamento igual ao dos onchaged de textfields)
   ListaAlunos({
@@ -32,11 +31,14 @@ class ListaAlunos extends StatelessWidget {
       }
     });
     switch (estado) {
+      case PesquisaEstado.carregarConteudo:
+        controlador.pesquisaAluno();
+        return Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 7,
+          ),
+        );
       case PesquisaEstado.carregando:
-        if (primeiraPesquisa) {
-          controlador.pesquisaAluno();
-          primeiraPesquisa = false;
-        }
         return Center(
           child: CircularProgressIndicator(
             strokeWidth: 7,
@@ -129,7 +131,7 @@ class ListBuilderAlunos extends StatelessWidget {
             onTap(aluno); //chama a função que passa o aluno no index atual
           },
           child: AlunoWidget(
-           aluno: aluno,
+            aluno: aluno,
           ),
         );
       },

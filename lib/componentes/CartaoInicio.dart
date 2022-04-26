@@ -97,7 +97,7 @@ class ConteudoLancarDiaria extends StatelessWidget {
       cor: Color(0xffd6a10f),
       titulo: "Lançar Diária",
       icone: Icons.calendar_today_outlined,
-      navegacao: "/telaLancarDiaria2",
+      navegacao: "/telaLancarDiaria",
       tipoNavegacao: TipoNavegacao.non_replace,
     );
   }

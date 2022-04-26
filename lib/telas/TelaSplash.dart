@@ -1,4 +1,6 @@
+
 import 'package:app_consultor/controladores/ControladorUsuario.dart';
+import 'package:app_consultor/util/UtilDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
@@ -17,18 +19,32 @@ class _TelaSplashState extends State<TelaSplash> {
   void initState() {
     // metodo initState e chamado antes de chamar as construcoes dos Widegts
 
-    Future.delayed(Duration(seconds: 2)).then((value) {
-      // demorar 2 segundos fixando a tela carregando
-      GetIt.I.get<ControladorUsuario>().verificarSeTemUsuario(
-          // usando depedencia get_it para verificar o registro no controladorUsuario se usario estalogado ou nao
-          temUsuario: () {
-        Navigator.pushReplacementNamed(context, "/telaInicio");
-        //pushReplacementNamed retira botao de voltar
-      }, naoTemUsuario: () {
-        Navigator.pushReplacementNamed(context,
-            "/telaLogin"); //pushReplacementNamed usado para usuario nao voltar para tela splash
-      });
-    });
+    GetIt.I.get<ControladorUsuario>().listarUrl(
+        erro: (erro) => print(erro),
+        sucesso: () {
+          GetIt.I.get<ControladorUsuario>().verificarSeTemUsuario(
+              // usando depedencia get_it para verificar o registro no controladorUsuario se usario estalogado ou nao
+              temUsuario: () {
+            ControladorUsuario controlador = GetIt.I.get<ControladorUsuario>();
+            controlador.estaDentroDoHorario(dentroHorario: () {
+              GetIt.I.get<ControladorUsuario>().listarUrl(
+                  erro: (erro) => null,
+                  sucesso: () {
+                    Navigator.pushReplacementNamed(context, "/telaInicio");
+                  });
+            });
+            print('');
+
+            //pushReplacementNamed retira botao de voltar
+          }, naoTemUsuario: () {
+            Navigator.pushReplacementNamed(context,
+                "/telaLogin"); //pushReplacementNamed usado para usuario nao voltar para tela splash
+          }, erro: (erro) {
+            UtilDialog.exibirInformacoes(context,
+                titulo: "Ops!", mensagem: erro);
+            Navigator.pushReplacementNamed(context, "/telaLogin");
+          });
+        });
 
     super.initState();
   }

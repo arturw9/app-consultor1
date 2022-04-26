@@ -15,6 +15,11 @@ class TelaLogin extends StatefulWidget {
 }
 
 class _TelaLoginState extends State<TelaLogin> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   ControladorUsuario _controladorUsuario = GetIt.I.get<
       ControladorUsuario>(); //chama a instancia do GetIt do controlador do usuario
 

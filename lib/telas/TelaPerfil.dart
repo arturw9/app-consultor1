@@ -1,10 +1,14 @@
 import 'package:app_consultor/componentes/ButtonPadrao.dart';
 import 'package:app_consultor/componentes/ImagemCadastro.dart';
 import 'package:app_consultor/controladores/ControladorCarrinho.dart';
+import 'package:app_consultor/controladores/ControladorLancarDiaria.dart';
+import 'package:app_consultor/controladores/ControladorPagamento.dart';
 import 'package:app_consultor/controladores/ControladorUsuario.dart';
 import 'package:app_consultor/modelos/Usuario.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+
+import 'TelaSplash.dart';
 
 class TelaPerfil extends StatefulWidget {
   TelaPerfil({Key? key}) : super(key: key);
@@ -47,77 +51,37 @@ class _TelaPerfilState extends State<TelaPerfil> {
                 ButtonDeslogarPerfil(
                   value: "DESLOGAR",
                   onTap: () {
-                    GetIt.I.get<ControladorCarrinho>().limparCarrinho();
                     GetIt.I.get<ControladorUsuario>().logoutUsuario(
                         deslogar: () {
-                      Navigator.pushReplacementNamed(context, "/telaSplash");
+                      limparGetIt();
+                      Navigator.of(context).pushAndRemoveUntil(
+                          //retira as telas anteriores
+                          MaterialPageRoute(builder: (context) => TelaSplash()),
+                          (Route<dynamic> route) => false);
                     });
                   },
                 ),
                 SizedBox(
                   height: 40,
                 )
-                // FieldNome(
-                //   valorInicial: usuario.nome,
-                //   onChanged: (text) {
-                //     //    _usuario.nome = text;
-                //   },
-                // ),
-                // FieldCPF(
-                //   onChanged: (text) {
-                //     //    _usuario.cpf = text;
-                //   },
-                // ),
-                // FieldCelular(
-                //   onChanged: (text) {
-                //     //    _usuario.celular = text;
-                //   },
-                // ),
-                // FieldEmail(
-                //   onChanged: (text) {
-                //     //    _usuario.email = text;
-                //   },
-                // ),
-                // FieldDataNasc(
-                //     //     onChanged: (text) {
-                //     //    _usuario.dataNasc = text;
-                //     //    },
-                //     ),
-                // FieldCEP(
-                //   onChanged: (text) {
-                //     //    _usuario.cep = text;
-                //   },
-                // ),
               ],
             ),
             //   ),
           ),
         ),
       ),
-      // bottomNavigationBar: Column(
-      //   mainAxisSize: MainAxisSize.min,
-      //   children: [
-      //     Container(
-      //       height: 100,
-      //       child: Center(
-      //         child: Row(
-      //           mainAxisAlignment: MainAxisAlignment.center,
-      //           children: [
-      //             ButtonDeslogarPerfil(
-      //               value: "DESLOGAR",
-      //               onTap: () {
-      //                 GetIt.I.get<ControladorUsuario>().logoutUsuario(
-      //                     deslogar: () {
-      //                   Navigator.pushReplacementNamed(context, "/telaSplash");
-      //                 });
-      //               },
-      //             ),
-      //           ],
-      //         ),
-      //       ),
-      //     ),
-      //   ],
-      // ),
     );
+  }
+
+  void limparGetIt() {
+    GetIt.I.unregister<ControladorLancarDiaria>();
+    GetIt.I.registerLazySingleton<ControladorLancarDiaria>(
+        () => ControladorLancarDiaria());
+    GetIt.I.unregister<ControladorCarrinho>();
+    GetIt.I.registerLazySingleton<ControladorCarrinho>(
+        () => ControladorCarrinho());
+    GetIt.I.unregister<ControladorPagamento>();
+    GetIt.I.registerLazySingleton<ControladorPagamento>(
+        () => ControladorPagamento());
   }
 }

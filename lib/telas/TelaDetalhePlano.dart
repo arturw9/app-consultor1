@@ -11,10 +11,9 @@ class TelaDetalhePlano extends StatefulWidget {
   _TelaDetalhePlanoState createState() => _TelaDetalhePlanoState();
 }
 
-ControladorPlano _controladorPlano = GetIt.I.get<ControladorPlano>();
-ControladorCarrinho _controladorCarrinho = GetIt.I.get<ControladorCarrinho>();
-
 class _TelaDetalhePlanoState extends State<TelaDetalhePlano> {
+  ControladorPlano _controladorPlano = GetIt.I.get<ControladorPlano>();
+  ControladorCarrinho _controladorCarrinho = GetIt.I.get<ControladorCarrinho>();
   String str = "";
   @override
   Widget build(BuildContext context) {
@@ -178,23 +177,25 @@ class _TelaDetalhePlanoState extends State<TelaDetalhePlano> {
                                 padding: const EdgeInsets.only(
                                     top: 5, left: 19, right: 19),
                               ),
-                              Row(
-                                children: [
-                                  Text("Anuidade",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontFamily: 'NunitoSans',
-                                          fontSize: 12)),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
-                                  Text(
-                                      "${_controladorPlano.plano!.valorAnuidade.toStringAsFixed(2)}",
-                                      style: TextStyle(
-                                          fontFamily: 'NunitoSans',
-                                          fontSize: 12))
-                                ],
-                              ),
+                              if (_controladorPlano.plano!.valorAnuidade !=
+                                  null)
+                                Row(
+                                  children: [
+                                    Text("Anuidade",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontFamily: 'NunitoSans',
+                                            fontSize: 12)),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                        "${_controladorPlano.plano!.valorAnuidade!.toStringAsFixed(2)}",
+                                        style: TextStyle(
+                                            fontFamily: 'NunitoSans',
+                                            fontSize: 12))
+                                  ],
+                                ),
                             ],
                           ),
                         )

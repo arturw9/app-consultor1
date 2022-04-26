@@ -4,12 +4,15 @@ import 'dart:core';
 import 'package:app_consultor/modelos/Produto.dart';
 
 class Venda {
+  DateTime? dataInicioVendaProdutos;
   int unidade;
   int? plano;
   String nome;
   String cpf;
   DateTime? diaVencimento;
-  int nrVezesDividir = 1;
+  String? dataInicio;
+  String? dataLancamento;
+  int? nrVezesDividir = 1;
   List<Produto>? produtos;
   Venda({
     required this.unidade,
@@ -19,12 +22,17 @@ class Venda {
     required this.diaVencimento,
     required this.nrVezesDividir,
     required this.produtos,
+    this.dataInicio,
+    this.dataLancamento,
   });
 
   Map<String, dynamic> toMap() {
     return {
+      'dataInicioVendaProdutos': dataInicioVendaProdutos != null
+          ? dataInicioVendaProdutos!.millisecondsSinceEpoch
+          : null,
       'unidade': unidade,
-      'plano': plano,
+      'plano': plano != null ? plano : null,
       'nome': nome,
       'cpf': cpf,
       "sexo": null,
@@ -49,7 +57,8 @@ class Venda {
       "vencimentoFatura": 5,
       'produtos': produtos?.map((x) => x.toMap()).toList(),
       "cobrarParcelasEmAberto": true,
-      "dataInicioContrato": null,
+      "dataInicioContrato": dataInicio,
+      "dataLancamento": dataLancamento,
       "aulasMarcadas": []
     };
   }
@@ -63,14 +72,17 @@ class Venda {
       diaVencimento: map['diaVencimento'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['diaVencimento'])
           : null,
-      nrVezesDividir: map['nrVezesDividir'],
+      nrVezesDividir:
+          map['nrVezesDividir'] != null ? map['nrVezesDividir'] : null,
       produtos: map['produtos'] != null
           ? List<Produto>.from(map['produtos']?.map((x) => Produto.fromMap(x)))
           : null,
+      dataInicio: map['dataInicio'],
+      dataLancamento: map['datalancamento'],
     );
   }
 
-  String toJson() => json.encode(toMap());
+  dynamic toJson() => json.encode(toMap());
 
   factory Venda.fromJson(String source) => Venda.fromMap(json.decode(source));
 }

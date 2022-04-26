@@ -16,7 +16,7 @@ class TelaPesquisaProdutos extends StatefulWidget {
 class _TelaPesquisaProdutosState extends State<TelaPesquisaProdutos> {
   ServicosProduto servicosProdutos = ServicosProduto();
   ControladorPesquisaProdutos controladorPesquisaProdutos =
-      ControladorPesquisaProdutos();
+      ControladorPesquisaProdutos(diaria: false);
   var textController = TextEditingController();
   var _scrollController = ScrollController();
 
@@ -54,6 +54,10 @@ class _TelaPesquisaProdutosState extends State<TelaPesquisaProdutos> {
               child: PesquisaBarra(
                   textController: textController,
                   onSubmitted: (text) {
+                    controladorPesquisaProdutos.pesquisaProdutos(
+                        produto: textController.text);
+                  },
+                  onChanged: (text) {
                     controladorPesquisaProdutos.pesquisaProdutos(
                         produto: textController.text);
                   },

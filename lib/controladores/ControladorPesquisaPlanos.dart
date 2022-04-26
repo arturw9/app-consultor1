@@ -9,7 +9,8 @@ class ControladorPesquisaPlanos {
   int paginasTotal = 0; //recebe o valor de paginas total da api
   int paginaAtual = -1; //armazena a pagina atual começando da primeira
   final pesquisaEstado =
-      ValueNotifier<PesquisaEstado>(PesquisaEstado.carregando);
+      ValueNotifier<PesquisaEstado>(PesquisaEstado.carregarConteudo);
+
   Future pesquisaPlano({String plano = ""}) async {
     //pesquisa o plano, caso não informado somente lista os planos
     pesquisaEstado.value = PesquisaEstado.carregando;

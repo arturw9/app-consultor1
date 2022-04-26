@@ -1,17 +1,20 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:app_consultor/modelos/Aluno.dart';
 import 'package:app_consultor/modelos/Cliente.dart';
+import 'package:app_consultor/modelos/HorarioAcesso.dart';
 import 'package:app_consultor/modelos/UrlsServicos.dart';
 import 'package:app_consultor/modelos/Usuario.dart';
 import 'package:app_consultor/servicos/ServicosCliente.dart';
+import 'package:app_consultor/servicos/ServicosNavegacao.dart';
 import 'package:app_consultor/servicos/ServicosUsuarioLogin.dart';
+import 'package:app_consultor/util/UtilDialog.dart';
 import 'package:get_it/get_it.dart';
 
 import 'package:mobx/mobx.dart';
+import 'package:ntp/ntp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-//Mobx
-//Usa o storage do Mobx(https://pub.dev/packages/mobx)
 class ControladorUsuario with Store {
   Future<SharedPreferences> _prefs = SharedPreferences
       .getInstance(); // usando a dependencia SharedPreference pequeno banco d dados , verifica se o usuario esta ou nao no banco
@@ -22,57 +25,45 @@ class ControladorUsuario with Store {
   Usuario usuarioLogado = Usuario(email: "", senha: "");
   Usuario usuario = Usuario(email: "", senha: "");
   UrlsServicos urlsServicos = UrlsServicos();
-  // Usuario get usuario {
-  //   _prefs.then((db) {
-  //     var usuarioJson = db.getString("user");
-  //     return Usuario.fromJson(JsonCodec().decode(usuarioJson.toString()));
-  //   });
-
-  // }
-
-  // void set usuario(Usuario user) {
-  //   usuario = user;
-  //   _prefs.then((db) {
-  //     db.setString("user", JsonCodec().encode(usuario.retorno.toJson()));
-  //     usuarioLogado = usuario.retorno;
-  //   });
-  // }
-
   void verificarSeTemUsuario(
-      {Function()? temUsuario, Function()? naoTemUsuario}) {
+      {Function()? temUsuario,
+      Function()? naoTemUsuario,
+      Function(String mensagem)? erro}) {
     _prefs.then((db) {
-      //SharedPreference pequeno banco de dados(https://pub.dev/packages/shared_preferences)
-      // db.remove("user"); //apaga usuario de dentro do banco local
-      var usuarioJson = db
-          .getString("user"); // verifica se no banco de dados existe um usuario
+      var usuarioJson = db.getString("user");
       if (usuarioJson != null) {
         usuarioLogado = Usuario.fromJson(JsonCodec().decode(usuarioJson));
-        usuario =
-            usuarioLogado; //Um JsonCodec codifica objetos JSON em strings e decodifica strings em objetos JSON.
+        usuario = usuarioLogado;
         temUsuario?.call();
       } else {
-        naoTemUsuario
-            ?.call(); //validando se é nulo ou nao para cair na chamado do call
+        naoTemUsuario?.call();
       }
+    }).catchError((err) {
+      erro?.call("Algo deu errado, por favor realize o login novamente");
     });
+  }
+
+  void listarUrl({Function()? sucesso, Function(String mensagem)? erro}) {
+    servicosUsuarioLogin
+        .listarUrls(usuario.key != null ? usuario.key.toString() : "")
+        .then((retorno) {
+      sucesso!.call();
+      urlsServicos = retorno;
+    }).catchError((onError) => erro?.call("Urls de serviço não encontrados!"));
   }
 
   void autenticarUsuario(
       {Function()? sucesso, Function(String mensagem)? erro}) {
     servicosUsuarioLogin.autentificarUsuario(usuario).then((retorno) {
-      //chama o autenticar usuario do serviço de login
-      usuario.token = retorno.token; //captura o token
-      servicosUsuarioLogin
-          .listarUrls(usuario.key.toString()) //chama o serviço de listarUrls
-          .then((retorno) => urlsServicos = retorno)
-          .catchError(
-              (onError) => erro?.call("Urls de serviço não encontrados!"));
-      _prefs.then((db) {
-        //salva o usuario atual no prefs
-        db.setString("user", JsonCodec().encode(usuario.toJson()));
-        usuarioLogado = usuario;
+      usuario.token = retorno.token;
+      servicosUsuarioLogin.buscarHorarioAcesso().then((horario) {
+        usuario.horarioAcesso = horario.listaHorarioAcesso;
+        _prefs.then((db) {
+          db.setString("user", JsonCodec().encode(usuario.toJson()));
+          usuarioLogado = usuario;
+          sucesso?.call();
+        });
       });
-      sucesso?.call();
     }).catchError((onError) {
       erro?.call("Usuário ou senha estão incorretos!");
     });
@@ -80,15 +71,11 @@ class ControladorUsuario with Store {
 
   void logarUsuario({Function()? sucesso, Function(String mensagem)? erro}) {
     if ((usuario.email.isEmpty) || (usuario.senha.isEmpty)) {
-      //realiza a validação dos dados que o usuario informa
       erro?.call("Usuário ou senha inválidos!");
     } else {
-      servicosUsuarioLogin //chama o serviço de logar o usuario
+      servicosUsuarioLogin
           .logarUsuario(
-        usuario.email
-            .toString()
-            .toLowerCase()
-            .trim(), //formata o email retirando os espaços em branco e colacando em lowerCase
+        usuario.email.toString().toLowerCase().trim(),
         usuario.senha.toString(),
       )
           .then((retorno) {
@@ -97,7 +84,8 @@ class ControladorUsuario with Store {
         usuario.urlFoto = retorno.urlFoto;
         usuario.userName = retorno.userName;
         usuario.listaUnidades = retorno.listaUnidades;
-        sucesso?.call();
+        usuario.codigoColaborador = retorno.codigoColaborador;
+        listarUrl(sucesso: () => sucesso?.call(), erro: erro);
       }).catchError((onError) {
         erro?.call("Usuário ou senha estão incorretos!");
       });
@@ -106,9 +94,6 @@ class ControladorUsuario with Store {
 
   void cadastrarCliente(Cliente clienteCadastrar,
       {Function(Aluno aluno)? sucesso, Function(String mensagem)? erro}) {
-    // if (clienteCadastrar.cpf.toString().trim() ==
-    //     clienteCadastrar.cpf.toString().trim()) {
-    //   erro?.call("CPF já cadastrado!");
     if ((clienteCadastrar.celular.toString().isEmpty) ||
         (clienteCadastrar.imageUri.toString().isEmpty) ||
         (clienteCadastrar.cep.toString().isEmpty) ||
@@ -116,7 +101,6 @@ class ControladorUsuario with Store {
         (clienteCadastrar.cpf.toString().isEmpty) ||
         (clienteCadastrar.dataNascimento.toString().isEmpty) ||
         (clienteCadastrar.nome.toString().isEmpty)) {
-      // realiza a validação dos dados que o usuario informa
       erro?.call("Cadastro Inválido!");
     } else {
       servicoPersonagem.cadastroCliente(clienteCadastrar).then((aluno) {
@@ -127,12 +111,72 @@ class ControladorUsuario with Store {
     }
   }
 
+  static Future<DateTime> dateTimeAtual() async {
+    DateTime horaAtual = await NTP.now().catchError((e) {
+      return DateTime.now();
+    });
+
+    return horaAtual;
+  }
+
+  void estaDentroDoHorario({
+    Function()? dentroHorario,
+    Function()? foraHorario,
+  }) async {
+    DateTime agora = DateTime.now();
+    await dateTimeAtual().then((hora) => agora = hora);
+    HorarioAcesso horario = usuario.horarioAcesso!
+        .firstWhere((element) => element.diaSemana == agora.weekday);
+    DateTime horaInicial = new DateTime(
+        agora.year,
+        agora.month,
+        agora.day,
+        int.parse(horario.horaInicial.substring(0, 2)),
+        int.parse(horario.horaInicial.substring(3, 5)),
+        agora.second,
+        agora.millisecond,
+        agora.microsecond);
+    DateTime horaFinal = new DateTime(
+        agora.year,
+        agora.month,
+        agora.day,
+        int.parse(horario.horaFinal.substring(0, 2)),
+        int.parse(horario.horaFinal.substring(3, 5)),
+        agora.second,
+        agora.millisecond,
+        agora.microsecond);
+    if (horaInicial.isBefore(agora) && horaFinal.isAfter(agora)) {
+      if (horaFinal.difference(agora).inMinutes < 20) {
+        int tempoAviso = horaFinal.difference(agora).inMinutes - 5 < 0
+            ? 0
+            : horaFinal.difference(agora).inMinutes - 5;
+        Timer(Duration(minutes: tempoAviso, seconds: 5), () {
+          UtilDialog.exibirInformacoes(
+              GetIt.I.get<ServicoNavegacao>().navigatorKey.currentContext!,
+              mensagem:
+                  "Seu horario de acesso encerra em ${horaFinal.difference(agora).inMinutes} minutos!",
+              titulo: "AVISO");
+          Timer(
+              Duration(minutes: horaFinal.difference(agora).inMinutes),
+              () => GetIt.I
+                  .get<ServicoNavegacao>()
+                  .navegarPara('/telaForaDoHorario'));
+        });
+      }
+      dentroHorario?.call();
+    } else {
+      foraHorario?.call();
+      if (foraHorario == null)
+        GetIt.I.get<ServicoNavegacao>().navegarPara('/telaForaDoHorario');
+    }
+  }
+
   void logoutUsuario({Function()? deslogar}) {
     _prefs.then((db) {
       db.remove("user");
       usuarioLogado = Usuario(email: "", senha: "");
       usuario = Usuario(email: "", senha: "");
-      deslogar!(); //apaga usuario de dentro do banco local
+      deslogar!();
     });
   }
 }

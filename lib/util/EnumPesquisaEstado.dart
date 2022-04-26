@@ -1,1 +1,7 @@
-enum PesquisaEstado { carregando, sucesso, erro, novoConteudo }
+enum PesquisaEstado {
+  carregando,
+  sucesso,
+  erro,
+  novoConteudo,
+  carregarConteudo
+}

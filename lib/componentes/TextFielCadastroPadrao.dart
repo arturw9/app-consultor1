@@ -4,6 +4,8 @@ import 'package:get/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
+import 'package:keyboard_actions/keyboard_actions.dart';
+
 class FieldNome extends StatelessWidget {
   final String? valorInicial;
   final Function(String text) onChanged;
@@ -71,7 +73,7 @@ class FieldCPF extends StatelessWidget {
           color: Color(0XFF6F747B),
         ),
         inputFormatters: [maskFormatter],
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.datetime,
         decoration: InputDecoration(
           labelText: "CPF",
           hintText: '000.000.000-00',
@@ -108,7 +110,7 @@ class FieldCelular extends StatelessWidget {
           color: Color(0XFF6F747B),
         ),
         inputFormatters: [maskFormatter],
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.datetime,
         decoration: InputDecoration(
           labelText: "Celular",
           hintText: '(99)9 9999-9999',
@@ -160,14 +162,15 @@ class FieldEmail extends StatelessWidget {
 }
 
 class FieldDataNasc extends StatefulWidget {
-  //final Function(String? text) onChanged;
   final TextEditingController dataControler;
   final ValueChanged<String> onSelected;
+  // final ValueChanged<DateTime> onSelectedDate;
 
   const FieldDataNasc({
     Key? key,
     required this.dataControler,
     required this.onSelected,
+    // required this.onSelectedDate,
   }) : super(key: key);
 
   @override
@@ -197,7 +200,8 @@ class _FieldDataNascState extends State<FieldDataNasc> {
           color: Color(0XFF6F747B),
         ),
         inputFormatters: [maskFormatter],
-        keyboardType: TextInputType.number,
+
+        // keyboardType: TextInputType.number,
         decoration: InputDecoration(
           suffixIcon: IconButton(
             icon: Icon(
@@ -254,7 +258,7 @@ class FieldCEP extends StatelessWidget {
           color: Color(0XFF6F747B),
         ),
         inputFormatters: [maskFormatter],
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.datetime,
         decoration: InputDecoration(
           labelText: "CEP",
           hintText: '74956-123',
@@ -266,6 +270,66 @@ class FieldCEP extends StatelessWidget {
         ),
       ),
       padding: const EdgeInsets.only(bottom: 20),
+    );
+  }
+}
+
+class Content extends StatefulWidget {
+  Content({Key? key}) : super(key: key);
+
+  @override
+  State<Content> createState() => _ContentState();
+}
+
+//Modelo usando pub keyboard_actions: ^3.4.6 ,  caso queira implementar somente teclado numerico no IOS
+
+class _ContentState extends State<Content> {
+  final FocusNode _nodeText2 = FocusNode();
+
+  /// Creates the [KeyboardActionsConfig] to hook up the fields
+  /// and their focus nodes to our [FormKeyboardActions].
+  KeyboardActionsConfig _buildConfig(BuildContext context) {
+    return KeyboardActionsConfig(
+      keyboardActionsPlatform: KeyboardActionsPlatform.ALL,
+      keyboardBarColor: Colors.grey[200],
+      nextFocus: true,
+      actions: [
+        KeyboardActionsItem(focusNode: _nodeText2, toolbarButtons: [
+          (node) {
+            return GestureDetector(
+              onTap: () => node.unfocus(),
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Icon(Icons.close),
+              ),
+            );
+          }
+        ]),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyboardActions(
+      config: _buildConfig(context),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              TextFormField(
+                keyboardType: TextInputType.text,
+                focusNode: _nodeText2,
+                decoration: InputDecoration(
+                  hintText: "Input Text with Custom Done Button",
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

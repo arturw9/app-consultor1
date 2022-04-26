@@ -5,7 +5,7 @@ class Produto {
   double valorFinal;
   String codigo;
   int quantidade = 0;
-
+  int? modalidade;
   //Contrutores
   Produto(
       {required this.descricao,
@@ -15,16 +15,16 @@ class Produto {
 
   Map<String, dynamic> toMap() {
     return {
-      'descricao': descricao,
-      'valorFinal': valorFinal,
-      'codigo': codigo,
+      'produto': codigo,
+      'qtd': quantidade,
+      if (modalidade != null) 'modalidade': modalidade
     };
   }
 
   factory Produto.fromMap(Map<String, dynamic> map) {
     return Produto(
         descricao: map['descricao'].toString(),
-        valorFinal: map['valorFinal'],
+        valorFinal: map['valorFinal'] == null ? 0 : map['valorFinal'],
         codigo: map['codigo'].toString(),
         quantidade: 0);
   }
@@ -32,7 +32,7 @@ class Produto {
     map = map['produto'];
     return Produto(
         descricao: map['descricao'].toString(),
-        valorFinal: map['valorFinal'],
+        valorFinal: map['valorFinal'] == null ? 0 : map['valorFinal'],
         codigo: map['codigo'].toString(),
         quantidade: 1);
   }

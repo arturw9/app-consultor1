@@ -1,5 +1,9 @@
 import 'package:app_consultor/componentes/ButtonPadrao.dart';
+import 'package:app_consultor/componentes/CardDuracao.dart';
+import 'package:app_consultor/componentes/CardModalidadePlano.dart';
+import 'package:app_consultor/componentes/CardPacotePlano.dart';
 import 'package:app_consultor/controladores/ControladorCarrinho.dart';
+import 'package:app_consultor/controladores/ControladorPagamento.dart';
 import 'package:app_consultor/controladores/ControladorUsuario.dart';
 import 'package:app_consultor/modelos/Produto.dart';
 import 'package:app_consultor/modelos/Usuario.dart';
@@ -7,10 +11,14 @@ import 'package:app_consultor/modelos/Venda.dart';
 import 'package:app_consultor/servicos/ServicoVenda.dart';
 
 import 'package:app_consultor/util/FormatarData.dart';
+import 'package:app_consultor/util/UtilCarregamento.dart';
+import 'package:app_consultor/util/UtilDialog.dart';
+import 'package:date_format/date_format.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
+import 'package:app_consultor/componentes/CardHorario.dart';
 
 class TelaFechamentoVenda extends StatefulWidget {
   TelaFechamentoVenda({Key? key}) : super(key: key);
@@ -19,15 +27,13 @@ class TelaFechamentoVenda extends StatefulWidget {
   _TelaFechamentoVendaState createState() => _TelaFechamentoVendaState();
 }
 
-ControladorCarrinho _controladorCarrinho = GetIt.I.get<ControladorCarrinho>();
-Usuario usuario = GetIt.I.get<ControladorUsuario>().usuario;
-
 class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
-  double totalProdutosPlano = 0;
   String str = "";
   int _valorVezesPagar = 1;
   int _vencFatura = 1;
-
+  ControladorCarrinho _controladorCarrinho = GetIt.I.get<ControladorCarrinho>();
+  Usuario usuario = GetIt.I.get<ControladorUsuario>().usuario;
+  var _valorSelecionado;
   var dataNascimento;
 
   get diaVencimento => null;
@@ -35,15 +41,26 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
   get email => null;
 
   @override
-  Widget build(BuildContext context) {
-    double soma = 0;
-    _controladorCarrinho.plano!.produtos!.forEach((element) {
-      soma += element.valorFinal * element.quantidade;
-      totalProdutosPlano = soma;
-    });
+  void initState() {
+    if (_controladorCarrinho.plano!.tipoPlano == "PLANO_CREDITO")
+      _controladorCarrinho.plano!.modalidades
+          .forEach((x) => x.selecionado = true);
+    super.initState();
+  }
 
+  @override
+  void dispose() {
+    _controladorCarrinho.plano!.modalidades.forEach((element) {
+      element.selecionado = false;
+    });
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text("FECHAMENTO DA VENDA",
             style: TextStyle(
               fontFamily: 'NunitoSans',
@@ -170,6 +187,72 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 10),
+                    child: Text(
+                      "Lançamento ",
+                      style: TextStyle(
+                          fontFamily: 'NunitoSans',
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      "${formatDate(_controladorCarrinho.lancamento!, [
+                            dd,
+                            '/',
+                            mm,
+                            '/',
+                            yyyy
+                          ])}",
+                      style: TextStyle(
+                          fontFamily: 'NunitoSans',
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: 12),
+              ),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Text(
+                      "Data de inicio ",
+                      style: TextStyle(
+                          fontFamily: 'NunitoSans',
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      "${formatDate(_controladorCarrinho.datainicio!, [
+                            dd,
+                            '/',
+                            mm,
+                            '/',
+                            yyyy
+                          ])}",
+                      style: TextStyle(
+                          fontFamily: 'NunitoSans',
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: 12),
+              ),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10),
                     child: Container(
                       child: Text(
                         "Empresa ",
@@ -270,107 +353,54 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
               Padding(
                 padding: EdgeInsets.only(bottom: 12),
               ),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Text(
-                      "Anuidade ",
+              if (_controladorCarrinho.plano!.valorAnuidade != null)
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Text(
+                        "Anuidade ",
+                        style: TextStyle(
+                            fontFamily: 'NunitoSans',
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14),
+                      ),
+                    ),
+                    Text(
+                      "${_controladorCarrinho.plano!.valorAnuidade!.toStringAsFixed(2)}",
                       style: TextStyle(
                           fontFamily: 'NunitoSans',
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w400,
                           fontSize: 14),
                     ),
-                  ),
-                  Text(
-                    "${_controladorCarrinho.plano!.valorAnuidade.toStringAsFixed(2)}",
-                    style: TextStyle(
-                        fontFamily: 'NunitoSans',
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14),
-                  ),
-                ],
-              ),
-
-              // Row(
-              //   children: [
-              //     Text(
-              //       "Bolsa ",
-              //       style: TextStyle(
-              //           fontFamily: 'NunitoSans',
-              //           fontWeight: FontWeight.w800,
-              //           fontSize: 14),
-              //     ),
-              //     Text(
-              //       "${str = _controladorCarrinho.plano!.bolsa ? "SIM" : "NÃO"}",
-              //       //  "NÃO",
-              //       style: TextStyle(
-              //           fontFamily: 'NunitoSans',
-              //           fontWeight: FontWeight.w400,
-              //           fontSize: 14),
-              //     ),
-              //   ],
-              // ),
-              SizedBox(height: 10),
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                child: ExpansionTile(
-                  initiallyExpanded: true,
-                  childrenPadding: EdgeInsets.all(12),
-                  title: Text("Modalidades",
-                      style: TextStyle(
-                          color: Color(0XFF0380E3),
-                          fontFamily: 'NunitoSans',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14)),
-                  children: [
-                    ListView.builder(
-                        shrinkWrap: true,
-                        itemCount:
-                            _controladorCarrinho.plano!.modalidades.length,
-                        itemBuilder: (context, index) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                width: MediaQuery.of(context).size.width * 0.55,
-                                child: Text(
-                                    "${_controladorCarrinho.plano!.modalidades[index].nome.toString()}  ",
-                                    style: TextStyle(
-                                        fontFamily: 'NunitoSans',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 13)),
-                              ),
-                              Container(
-                                width: MediaQuery.of(context).size.width * 0.05,
-                                child: Text(
-                                    "${_controladorCarrinho.plano!.modalidades[index].numeroVezes.toString() + "x"}  ",
-                                    style: TextStyle(
-                                        fontFamily: 'NunitoSans',
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 13)),
-                              ),
-                              Container(
-                                alignment: Alignment.centerRight,
-                                width: MediaQuery.of(context).size.width * 0.2,
-                                child: Text(
-                                    "R\$ ${_controladorCarrinho.plano!.modalidades[index].valorMensal!.toStringAsFixed(2)}  ",
-                                    style: TextStyle(
-                                        fontFamily: 'NunitoSans',
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 13)),
-                              ),
-                            ],
-                          );
-                        }),
-                    SizedBox(
-                      height: 10,
-                    )
                   ],
                 ),
+              SizedBox(height: 10),
+              if (_controladorCarrinho.plano!.pacotes != null)
+                CardPacotePlano(
+                    controladorCarrinho: _controladorCarrinho,
+                    atualizar: () => setState(() {})),
+              CardModalidadePlano(
+                  atualizar: () => setState(() {}),
+                  controladorCarrinho: _controladorCarrinho,
+                  selecionar: (valor) => setState(() {
+                        if (_valorSelecionado != null)
+                          _controladorCarrinho
+                              .plano!
+                              .modalidades[_valorSelecionado]
+                              .selecionado = false;
+                        _controladorCarrinho
+                            .plano!.modalidades[valor!].selecionado = true;
+                        _valorSelecionado = valor;
+                      })),
+              SizedBox(height: 10),
+              CardDuracao(
+                controladorCarrinho: _controladorCarrinho,
               ),
+              CardHorario(
+                controladorCarrinho: _controladorCarrinho,
+              ),
+
               Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: Card(
@@ -593,7 +623,7 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
                                     fontWeight: FontWeight.w700,
                                     fontSize: 13)),
                             Text(
-                                " R\$ ${totalProdutosPlano.toStringAsFixed(2)}  ",
+                                " R\$ ${_controladorCarrinho.totalProdutosPlano.toStringAsFixed(2)}  ",
                                 style: TextStyle(
                                     fontFamily: 'NunitoSans',
                                     fontWeight: FontWeight.w700,
@@ -605,7 +635,6 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
                   ),
                 ),
               ),
-
               SizedBox(
                 height: 32,
               ),
@@ -621,7 +650,7 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
                             fontSize: 14)),
                   ),
                   Text(
-                      " R\$ ${_controladorCarrinho.plano!.valorFinal!.toStringAsFixed(2)}",
+                      " R\$ ${_controladorCarrinho.totalContrato.toStringAsFixed(2)}",
                       // " R\$ ${_controladorCarrinho.plano!.valorFinal!.toStringAsFixed(2)}",
                       style: TextStyle(
                           fontFamily: 'NunitoSans',
@@ -675,7 +704,7 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
                                   fontFamily: 'NunitoSans'),
                             ),
                             Text(
-                              "R\$ ${(_controladorCarrinho.totalProdutos + _controladorCarrinho.plano!.valorFinal!).toStringAsFixed(2)}",
+                              "R\$ ${(_controladorCarrinho.totalFechamento).toStringAsFixed(2)}",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
@@ -689,7 +718,6 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
               SizedBox(
                 height: 5,
               ),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -723,7 +751,7 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
                         alignment: Alignment.centerRight,
                         value: _valorVezesPagar,
                         items: List<int>.generate(
-                            _controladorCarrinho.plano!.nrParcelas!,
+                            _controladorCarrinho.plano!.maximoVezesParcelar!,
                             (i) => i + 1).map((int value) {
                           return new DropdownMenuItem<int>(
                             value: value,
@@ -765,7 +793,8 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
                         borderRadius: BorderRadius.circular(20),
                         alignment: Alignment.centerRight,
                         value: _vencFatura,
-                        items: List<int>.generate(28, (i) => i + 1)
+                        items: _controladorCarrinho
+                            .plano!.diasVencimentoProrata!
                             .map((int value) {
                           return new DropdownMenuItem<int>(
                             value: value,
@@ -812,7 +841,8 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
                     ButtonAlterarFechamentoVenda(
                       value: "ALTERAR",
                       onTap: () {
-                        Navigator.pushNamed(context, "/telaCarrinho");
+                        Navigator.pushReplacementNamed(
+                            context, "/telaCarrinho");
                       },
                     ),
                     SizedBox(
@@ -821,16 +851,45 @@ class _TelaFechamentoVendaState extends State<TelaFechamentoVenda> {
                     ButtonConcluirFechamentoVenda(
                       value: "CONCLUIR",
                       onTap: () {
-                        // Venda venda = Venda(
-                        //     unidade: 1,
-                        //     plano: _controladorCarrinho.plano!.codigo,
-                        //     nome: _controladorCarrinho.aluno!.nome.toString(),
-                        //     cpf: _controladorCarrinho.aluno!.cpf.toString(),
-                        //     diaVencimento: diaVencimento,
-                        //     nrVezesDividir: _valorVezesPagar,
-                        //     produtos: _controladorCarrinho.listaProdutos);
-                        // ServicoVenda.concluirVenda(venda);
-                        Navigator.pushNamed(context, "/telaPagamento");
+                        GetIt.I.get<ControladorPagamento>().aluno =
+                            _controladorCarrinho.aluno;
+                        GetIt.I.get<ControladorPagamento>().plano =
+                            _controladorCarrinho.plano;
+                        GetIt.I.get<ControladorPagamento>().total =
+                            _controladorCarrinho.totalProdutos;
+                        Venda venda = Venda(
+                            unidade: 1,
+                            dataInicio: formatDate(
+                                _controladorCarrinho.datainicio!,
+                                ["yyyy", '-', "mm", '-', "dd"]),
+                            dataLancamento: formatDate(
+                                _controladorCarrinho.lancamento!,
+                                ["yyyy", '-', "mm", '-', "dd"]),
+                            plano: _controladorCarrinho.plano!.codigo,
+                            nome: _controladorCarrinho.aluno!.nome.toString(),
+                            cpf: _controladorCarrinho.aluno!.cpf.toString(),
+                            diaVencimento: diaVencimento,
+                            nrVezesDividir: _valorVezesPagar,
+                            produtos: _controladorCarrinho.listaProdutos);
+                        UtilCarregamento.exibirCarregamento(context);
+                        ServicoVenda.concluirVenda(venda).then((value) {
+                          GetIt.I.get<ControladorPagamento>().aluno =
+                              _controladorCarrinho.aluno;
+                          GetIt.I.get<ControladorPagamento>().plano =
+                              _controladorCarrinho.plano;
+                          GetIt.I.get<ControladorPagamento>().total =
+                              _controladorCarrinho.totalProdutos;
+                          GetIt.I.resetLazySingleton<ControladorCarrinho>();
+                          Navigator.of(context).pop();
+                          Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              "/telaPagamento",
+                              (Route<dynamic> route) => false);
+                        }).catchError((erro) {
+                          Navigator.of(context).pop();
+                          UtilDialog.exibirInformacoes(context,
+                              titulo: "Ops!", mensagem: erro);
+                        });
                       },
                     ),
                   ],

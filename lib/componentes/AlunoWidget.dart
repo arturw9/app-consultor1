@@ -65,8 +65,17 @@ class AlunoWidget extends StatelessWidget {
               ),
               Container(
                 width: MediaQuery.of(context).size.width * 0.2,
-                child: SituacaoWidget(
-                  aluno: aluno,
+                child: Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    textDirection: TextDirection.rtl,
+                    children: [
+                      if (aluno.situacaoContrato != null)
+                        Situacao(tipo: aluno.situacaoContrato!),
+                      if (aluno.situacao != null)
+                        Situacao(tipo: aluno.situacao!),
+                    ],
+                  ),
                 ),
               )
             ],
